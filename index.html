@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="app-version" content="0.1.0">
+<meta name="theme-color" content="#1B222C">
+<meta name="description" content="アカウントIDとパスワードを端末内で暗号化して保管するPWA">
+<title>Pass Vault</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ ローディング ============ -->
+  <div id="screen-loading" class="screen">
+    <div class="loading-mark">🔐</div>
+  </div>
+
+  <!-- ============ 初回セットアップ ============ -->
+  <section id="screen-setup" class="screen hidden">
+    <div class="auth-wrap">
+      <header class="auth-head">
+        <h1>Pass Vault へようこそ</h1>
+        <p class="soft">マスターパスワードは使いません。かわりに、このアプリが自動で発行する「アクセスキー」で暗号化・解錠します。</p>
+      </header>
+
+      <div id="setup-step-intro" class="setup-step">
+        <p>次の画面で、<strong>主アクセスキー</strong>と<strong>予備アクセスキー</strong>の2つが表示されます。どちらか一方があれば解錠できます。認証アプリのメモ機能・パスワードマネージャー・印刷など、<strong>別々の場所</strong>に保管してください。</p>
+        <p class="warn-text">⚠ 2つとも紛失すると、データを復元する手段はありません。</p>
+        <button id="btn-setup-generate" class="btn btn-primary btn-block">アクセスキーを発行する</button>
+      </div>
+
+      <div id="setup-step-keys" class="setup-step hidden">
+        <div class="key-card">
+          <div class="key-card-label">主アクセスキー</div>
+          <div id="qr-primary" class="qr-box"></div>
+          <div id="text-primary" class="key-text"></div>
+          <label class="check-row">
+            <input type="checkbox" id="check-primary">
+            <span>保存しました</span>
+          </label>
+        </div>
+        <div class="key-card">
+          <div class="key-card-label">予備アクセスキー</div>
+          <div id="qr-backup" class="qr-box"></div>
+          <div id="text-backup" class="key-text"></div>
+          <label class="check-row">
+            <input type="checkbox" id="check-backup">
+            <span>保存しました（主アクセスキーとは別の場所に）</span>
+          </label>
+        </div>
+        <button id="btn-setup-continue" class="btn btn-primary btn-block" disabled>保存しました。始める</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ロック画面 ============ -->
+  <section id="screen-lock" class="screen hidden">
+    <div class="auth-wrap">
+      <header class="auth-head">
+        <div class="lock-mark">🔒</div>
+        <h1>Pass Vault はロック中です</h1>
+        <p class="soft">主または予備のアクセスキーで解錠してください。</p>
+      </header>
+
+      <div id="lock-scan-area" class="hidden">
+        <video id="lock-video" playsinline muted></video>
+        <button id="btn-scan-cancel" class="btn btn-ghost btn-block">スキャンをやめる</button>
+      </div>
+
+      <div id="lock-form-area">
+        <button id="btn-scan-start" class="btn btn-secondary btn-block">📷 QRコードをスキャン</button>
+        <div class="divider"><span>または貼り付け</span></div>
+        <textarea id="lock-input" rows="2" placeholder="アクセスキーを貼り付け"></textarea>
+        <button id="btn-unlock" class="btn btn-primary btn-block">解錠する</button>
+        <p id="lock-error" class="error-text hidden"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ メイン画面 ============ -->
+  <section id="screen-app" class="screen hidden">
+    <header class="app-header">
+      <h1>Pass Vault</h1>
+      <div class="header-actions">
+        <button id="btn-settings" class="icon-btn" title="設定" aria-label="設定">⚙️</button>
+        <button id="btn-lock-now" class="icon-btn" title="今すぐロック" aria-label="今すぐロック">🔒</button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <input id="search-input" type="search" placeholder="サービス名・ID・カテゴリで検索">
+    </div>
+
+    <main id="entry-list" class="entry-list"></main>
+
+    <p id="empty-state" class="empty-state hidden">まだ登録がありません。右下の＋から追加してください。</p>
+
+    <button id="btn-add" class="fab" title="追加" aria-label="アカウントを追加">＋</button>
+  </section>
+
+  <!-- ============ エントリ 追加/編集 モーダル ============ -->
+  <div id="modal-entry" class="modal-backdrop hidden">
+    <div class="modal">
+      <header class="modal-head">
+        <h2 id="entry-modal-title">アカウントを追加</h2>
+        <button class="icon-btn modal-close" data-close="modal-entry" aria-label="閉じる">✕</button>
+      </header>
+      <div class="modal-body">
+        <form id="entry-form">
+          <input type="hidden" id="f-id">
+
+          <label class="field">
+            <span>サービス名 <em>必須</em></span>
+            <input type="text" id="f-serviceName" required>
+          </label>
+          <label class="field">
+            <span>URL</span>
+            <input type="url" id="f-url" placeholder="https://">
+          </label>
+          <label class="field">
+            <span>ログインID <em>必須</em></span>
+            <input type="text" id="f-loginId" required>
+          </label>
+          <label class="field">
+            <span>パスワード <em>必須</em></span>
+            <div class="pw-row">
+              <input type="password" id="f-password" required>
+              <button type="button" id="btn-toggle-pw" class="icon-btn" aria-label="表示切替">👁</button>
+              <button type="button" id="btn-gen-pw" class="icon-btn" aria-label="生成">🎲</button>
+            </div>
+            <div id="pw-strength" class="pw-strength"></div>
+          </label>
+          <label class="field">
+            <span>カテゴリ</span>
+            <input type="text" id="f-category" placeholder="例: 仕事 / 金融 / SNS">
+          </label>
+          <label class="field">
+            <span>メモ</span>
+            <textarea id="f-memo" rows="2"></textarea>
+          </label>
+
+          <details class="security-details">
+            <summary>セキュリティ情報（任意）</summary>
+
+            <label class="field">
+              <span>パスワード変更日</span>
+              <input type="date" id="f-passwordChangedAt">
+            </label>
+            <label class="field">
+              <span>有効期限／更新目安日</span>
+              <input type="date" id="f-expiresAt">
+            </label>
+            <label class="field">
+              <span>2段階認証バックアップコード</span>
+              <textarea id="f-twoFA" rows="2" placeholder="複数行で入力可"></textarea>
+            </label>
+
+            <div class="field">
+              <span>秘密の質問と答え</span>
+              <div id="secret-questions-list"></div>
+              <button type="button" id="btn-add-question" class="btn btn-ghost btn-small">＋ 質問を追加</button>
+            </div>
+
+            <div class="field">
+              <span>その他の項目</span>
+              <div id="custom-fields-list"></div>
+              <button type="button" id="btn-add-custom" class="btn btn-ghost btn-small">＋ 項目を追加</button>
+            </div>
+          </details>
+
+          <div class="modal-actions">
+            <button type="button" id="btn-delete-entry" class="btn btn-danger hidden">削除</button>
+            <button type="submit" class="btn btn-primary">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 設定モーダル ============ -->
+  <div id="modal-settings" class="modal-backdrop hidden">
+    <div class="modal">
+      <header class="modal-head">
+        <h2>設定</h2>
+        <button class="icon-btn modal-close" data-close="modal-settings" aria-label="閉じる">✕</button>
+      </header>
+      <div class="modal-body">
+        <div class="settings-block">
+          <h3>自動ロック</h3>
+          <label class="field">
+            <span>無操作でロックするまでの時間</span>
+            <select id="f-autolock">
+              <option value="60">1分</option>
+              <option value="300" selected>5分</option>
+              <option value="600">10分</option>
+              <option value="1800">30分</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="settings-block">
+          <h3>バックアップ</h3>
+          <p class="soft">暗号化されたままの状態でファイル保存／復元します。中身はアクセスキーがないと読めません。</p>
+          <button id="btn-export" class="btn btn-secondary btn-block">エクスポート（ダウンロード）</button>
+          <label class="btn btn-secondary btn-block file-btn">
+            インポート（ファイルから復元）
+            <input type="file" id="f-import" accept="application/json" hidden>
+          </label>
+        </div>
+
+        <div class="settings-block">
+          <h3>アクセスキーの再発行</h3>
+          <p class="soft">保存済みデータはそのままに、新しい主・予備アクセスキーを発行し直します。古いアクセスキーは使えなくなります。</p>
+          <button id="btn-rotate-keys" class="btn btn-secondary btn-block">再発行する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ アクセスキー再発行 表示モーダル ============ -->
+  <div id="modal-rotate" class="modal-backdrop hidden">
+    <div class="modal">
+      <header class="modal-head">
+        <h2>新しいアクセスキー</h2>
+        <button class="icon-btn modal-close" data-close="modal-rotate" aria-label="閉じる">✕</button>
+      </header>
+      <div class="modal-body">
+        <div class="key-card">
+          <div class="key-card-label">新しい主アクセスキー</div>
+          <div id="qr-rotate-primary" class="qr-box"></div>
+          <div id="text-rotate-primary" class="key-text"></div>
+        </div>
+        <div class="key-card">
+          <div class="key-card-label">新しい予備アクセスキー</div>
+          <div id="qr-rotate-backup" class="qr-box"></div>
+          <div id="text-rotate-backup" class="key-text"></div>
+        </div>
+        <p class="warn-text">⚠ 古いアクセスキーはこの時点で無効になります。両方とも安全な場所に保管してから閉じてください。</p>
+        <button id="btn-rotate-done" class="btn btn-primary btn-block">保管しました。閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="vendor/qrcode-gen.lib.js"></script>
+  <script src="crypto.js"></script>
+  <script src="accesskey.js"></script>
+  <script src="storage.js"></script>
+  <script src="qrcode.js"></script>
+  <script src="qrscan.js"></script>
+  <script src="generator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
