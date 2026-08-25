@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="0.1.2">
+<meta name="app-version" content="0.1.3">
 <meta name="theme-color" content="#1B222C">
 <meta name="description" content="アカウントIDとパスワードを端末内で暗号化して保管するPWA">
 <title>Pass Vault</title>
@@ -24,14 +24,14 @@
     <div class="auth-wrap">
       <header class="auth-head">
         <h1>Pass Vault へようこそ</h1>
-        <p class="soft">マスターパスワードは使いません。かわりに、このアプリが自動で発行する「アクセスキー」で暗号化・解錠します。</p>
+        <p class="soft">マスターパスワードは使いません。<br>かわりに、このアプリが自動で発行する「アクセスキー」で<br>暗号化・解錠します。</p>
       </header>
 
       <div id="setup-step-intro" class="setup-step">
         <ul class="intro-list">
-          <li><strong>主アクセスキー</strong>と<strong>予備アクセスキー</strong>の2つが発行されます</li>
-          <li>どちらか一方があれば解錠できます</li>
-          <li>認証アプリのメモ機能・パスワードマネージャー・印刷など、<strong>別々の場所</strong>に保管してください</li>
+          <li>アクセスキーは<strong>メイン</strong>と<strong>サブ</strong>の2つ発行されます</li>
+          <li>どちらでも解除可能</li>
+          <li>リスク分散のため、キーは<strong>別々</strong>で保管してください</li>
         </ul>
         <p class="warn-text">⚠ 2つとも紛失すると、データを復元する手段はありません。</p>
         <button id="btn-setup-generate" class="btn btn-primary btn-block">アクセスキーを発行する</button>
