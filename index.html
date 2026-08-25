@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="0.1.3">
+<meta name="app-version" content="0.1.4">
 <meta name="theme-color" content="#1B222C">
 <meta name="description" content="アカウントIDとパスワードを端末内で暗号化して保管するPWA">
 <title>Pass Vault</title>
@@ -24,7 +24,7 @@
     <div class="auth-wrap">
       <header class="auth-head">
         <h1>Pass Vault へようこそ</h1>
-        <p class="soft">マスターパスワードは使いません。<br>かわりに、このアプリが自動で発行する「アクセスキー」で<br>暗号化・解錠します。</p>
+        <p class="soft">アプリが発行する「アクセスキー」で施錠・開錠します。</p>
       </header>
 
       <div id="setup-step-intro" class="setup-step">
@@ -39,7 +39,7 @@
 
       <div id="setup-step-keys" class="setup-step hidden">
         <div class="key-card">
-          <div class="key-card-label">主アクセスキー</div>
+          <div class="key-card-label">メインアクセスキー</div>
           <div id="qr-primary" class="qr-box"></div>
           <div class="key-text-row">
             <div id="text-primary" class="key-text"></div>
@@ -51,7 +51,7 @@
           </label>
         </div>
         <div class="key-card">
-          <div class="key-card-label">予備アクセスキー</div>
+          <div class="key-card-label">サブアクセスキー</div>
           <div id="qr-backup" class="qr-box"></div>
           <div class="key-text-row">
             <div id="text-backup" class="key-text"></div>
@@ -59,7 +59,7 @@
           </div>
           <label class="check-row">
             <input type="checkbox" id="check-backup">
-            <span>保存しました（主アクセスキーとは別の場所に）</span>
+            <span>保存しました（メインアクセスキーとは別の場所に）</span>
           </label>
         </div>
         <button id="btn-setup-continue" class="btn btn-primary btn-block" disabled>保存しました。始める</button>
@@ -73,7 +73,7 @@
       <header class="auth-head">
         <div class="lock-mark">🔒</div>
         <h1>Pass Vault はロック中です</h1>
-        <p class="soft">主または予備のアクセスキーで解錠してください。</p>
+        <p class="soft">メインまたはサブのアクセスキーで解錠してください。</p>
       </header>
 
       <div id="lock-scan-area" class="hidden">
@@ -228,7 +228,7 @@
 
         <div class="settings-block">
           <h3>アクセスキーの再発行</h3>
-          <p class="soft">保存済みデータはそのままに、新しい主・予備アクセスキーを発行し直します。古いアクセスキーは使えなくなります。</p>
+          <p class="soft">保存済みデータはそのままに、新しいメイン・サブアクセスキーを発行し直します。古いアクセスキーは使えなくなります。</p>
           <button id="btn-rotate-keys" class="btn btn-secondary btn-block">再発行する</button>
         </div>
       </div>
@@ -244,7 +244,7 @@
       </header>
       <div class="modal-body">
         <div class="key-card">
-          <div class="key-card-label">新しい主アクセスキー</div>
+          <div class="key-card-label">新しいメインアクセスキー</div>
           <div id="qr-rotate-primary" class="qr-box"></div>
           <div class="key-text-row">
             <div id="text-rotate-primary" class="key-text"></div>
@@ -252,7 +252,7 @@
           </div>
         </div>
         <div class="key-card">
-          <div class="key-card-label">新しい予備アクセスキー</div>
+          <div class="key-card-label">新しいサブアクセスキー</div>
           <div id="qr-rotate-backup" class="qr-box"></div>
           <div class="key-text-row">
             <div id="text-rotate-backup" class="key-text"></div>
