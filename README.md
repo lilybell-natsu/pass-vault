@@ -28,15 +28,16 @@ Spending-Log / Fuel-Log / Home-Docs の姉妹プロジェクト。
 | `crypto.js` | HKDF鍵導出／AES-GCM暗号化・キーラップ |
 | `accesskey.js` | アクセスキーの生成・表示フォーマット・解析 |
 | `qrcode.js` | QRコード生成（`vendor/qrcode-gen.lib.js` を使用） |
-| `qrscan.js` | カメラ起動＋QR読み取り（`BarcodeDetector` API） |
+| `qrscan.js` | カメラ起動＋QR読み取り、画像ファイルからのQR読み取り（`vendor/jsqr.lib.js` を使用） |
 | `storage.js` | `localStorage` の読み書き |
 | `generator.js` | 登録アカウント用パスワードの生成・強度判定 |
 | `vendor/qrcode-gen.lib.js` | [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)（MIT License） |
+| `vendor/jsqr.lib.js` | [jsQR](https://github.com/cozmo/jsQR)（MIT License） |
 | `manifest.json` / `sw.js` / `icons/` | PWA化（service workerはnetwork-first） |
 
 ## 対応ブラウザについて
 
-QRコードのカメラ読み取りには `BarcodeDetector` API（Android Chrome / Edge 等のChromium系）を使用する。非対応ブラウザでは自動的に手動貼り付け欄へ誘導される。
+QRコードの読み取りは `vendor/jsqr.lib.js`（純JS実装）でデコードするため、`getUserMedia`（カメラ）に対応していればSafari/iOSを含め幅広いブラウザでカメラスキャンが動作する。カメラが使えない環境や、画面に表示されたQRコードではなく保存済みの画像から読み込みたい場合は「画像からQRコードを読み込む」ボタンで端末のフォルダ／写真ライブラリから選択できる。どちらも使えない場合は手動貼り付け欄が常に利用可能。
 
 ## 注意
 

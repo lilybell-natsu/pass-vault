@@ -161,10 +161,10 @@
     });
   }
 
-  // ---- QRスキャン(ロック画面) ----
+  // ---- QRスキャン(ロック画面・カメラ) ----
   async function startLockScan() {
-    if (!PassVaultQrScan.isSupported()) {
-      toast('このブラウザはカメラ読み取りに対応していません。貼り付けをご利用ください。');
+    if (!PassVaultQrScan.isCameraSupported()) {
+      toast('このブラウザはカメラ読み取りに対応していません。画像から読み込むか、貼り付けをご利用ください。');
       return;
     }
     $('#lock-form-area').classList.add('hidden');
@@ -177,7 +177,7 @@
         tryUnlock(value);
       },
       () => {
-        toast('カメラを起動できませんでした。貼り付けをご利用ください。');
+        toast('カメラを起動できませんでした。設定でカメラへのアクセスを許可するか、画像から読み込んでください。');
         $('#lock-scan-area').classList.add('hidden');
         $('#lock-form-area').classList.remove('hidden');
       }
@@ -187,6 +187,20 @@
     PassVaultQrScan.stop();
     $('#lock-scan-area').classList.add('hidden');
     $('#lock-form-area').classList.remove('hidden');
+  }
+
+  // ---- QR画像ファイルからの読み取り(端末の写真フォルダ等から選択) ----
+  async function handleScanImageFile(file) {
+    try {
+      const value = await PassVaultQrScan.decodeImageFile(file);
+      if (!value) {
+        toast('画像からQRコードを読み取れませんでした。');
+        return;
+      }
+      tryUnlock(value);
+    } catch (e) {
+      toast('画像の読み込みに失敗しました。');
+    }
   }
 
   // ==================================================
@@ -556,6 +570,11 @@
     });
     $('#btn-scan-start').addEventListener('click', startLockScan);
     $('#btn-scan-cancel').addEventListener('click', cancelLockScan);
+    $('#f-scan-image').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) handleScanImageFile(file);
+      e.target.value = '';
+    });
 
     $('#btn-lock-now').addEventListener('click', lockNow);
     $('#btn-add').addEventListener('click', openAddModal);

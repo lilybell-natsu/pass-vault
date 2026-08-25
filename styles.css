@@ -47,6 +47,9 @@ body{
   -webkit-tap-highlight-color:transparent;
 }
 button, input, textarea, select{ font:inherit; color:inherit; }
+/* iOSは font-size が16px未満のフォーム要素にフォーカスすると自動ズームするため、
+   入力系要素は明示的に16px以上を指定する */
+input, textarea, select{ font-size:16px; }
 h1,h2,h3{ margin:0; }
 
 .hidden{ display:none !important; }
@@ -123,7 +126,7 @@ h1,h2,h3{ margin:0; }
 #lock-video{ width:100%; border-radius:12px; background:#000; margin-bottom:12px; aspect-ratio:1/1; object-fit:cover; }
 #lock-input{
   width:100%; resize:vertical; border:1px solid var(--line); border-radius:10px;
-  padding:10px; background:var(--surface); font-family:ui-monospace,monospace; font-size:14px;
+  padding:10px; background:var(--surface); font-family:ui-monospace,monospace;
   margin-bottom:12px;
 }
 .error-text{ color:var(--bad); font-size:13.5px; margin-top:10px; text-align:center; }
@@ -140,7 +143,7 @@ h1,h2,h3{ margin:0; }
 .toolbar{ padding:0 16px 12px; }
 #search-input{
   width:100%; border:1px solid var(--line); border-radius:10px; padding:11px 12px;
-  background:var(--surface); font-size:15px;
+  background:var(--surface);
 }
 
 .entry-list{ padding:0 16px 100px; display:flex; flex-direction:column; gap:10px; }

@@ -1,24 +1,24 @@
-// qrscan.js — カメラ起動 + QR読み取り。
+// qrscan.js — カメラ起動 + QR読み取り、および画像ファイルからのQR読み取り。
 //
-// ブラウザ標準の BarcodeDetector API のみを使用（外部ライブラリ不要）。
-// 対応ブラウザ: Android Chrome / Edge 等（Chromium系）。Safari/Firefoxは非対応のため、
-// isSupported() が false の場合は呼び出し側が手動貼り付け欄に誘導すること。
+// vendor/jsqr.lib.js（cozmo/jsQR, MIT）による純JSデコードを使用。
+// ブラウザ標準の BarcodeDetector APIに依存しないため、Safari/iOSを含む
+// getUserMedia対応ブラウザ全般でカメラスキャンが動作する。
 
 const PassVaultQrScan = (() => {
   'use strict';
 
   let stream = null;
-  let detectorLoopId = null;
+  let rafId = null;
+  let workCanvas = null;
+  let workCtx = null;
 
-  function isSupported() {
-    return ('BarcodeDetector' in window) &&
-      !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  function isCameraSupported() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
   }
 
   // videoEl: <video> 要素。onDetect(text) が呼ばれたら自動的に停止する。
-  // onError(err) はカメラ取得失敗時などに呼ばれる。
   async function start(videoEl, onDetect, onError) {
-    if (!isSupported()) {
+    if (!isCameraSupported()) {
       onError && onError(new Error('unsupported'));
       return;
     }
@@ -29,32 +29,39 @@ const PassVaultQrScan = (() => {
       return;
     }
     videoEl.srcObject = stream;
+    videoEl.setAttribute('playsinline', 'true');
     await videoEl.play();
 
-    const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+    workCanvas = workCanvas || document.createElement('canvas');
+    workCtx = workCanvas.getContext('2d', { willReadFrequently: true });
 
-    const tick = async () => {
+    const tick = () => {
       if (!stream) return; // stop済み
-      try {
-        const codes = await detector.detect(videoEl);
-        if (codes && codes.length > 0 && codes[0].rawValue) {
-          const value = codes[0].rawValue;
-          stop();
-          onDetect && onDetect(value);
-          return;
+      if (videoEl.readyState === videoEl.HAVE_ENOUGH_DATA) {
+        workCanvas.width = videoEl.videoWidth;
+        workCanvas.height = videoEl.videoHeight;
+        workCtx.drawImage(videoEl, 0, 0, workCanvas.width, workCanvas.height);
+        try {
+          const imageData = workCtx.getImageData(0, 0, workCanvas.width, workCanvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+          if (code && code.data) {
+            stop();
+            onDetect && onDetect(code.data);
+            return;
+          }
+        } catch (e) {
+          // 1フレームの読み取り失敗は無視して継続
         }
-      } catch (e) {
-        // 1フレームの検出失敗は無視して継続
       }
-      detectorLoopId = requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     };
-    detectorLoopId = requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   }
 
   function stop() {
-    if (detectorLoopId) {
-      cancelAnimationFrame(detectorLoopId);
-      detectorLoopId = null;
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
     }
     if (stream) {
       stream.getTracks().forEach((t) => t.stop());
@@ -62,5 +69,31 @@ const PassVaultQrScan = (() => {
     }
   }
 
-  return { isSupported, start, stop };
+  // 画像ファイル(端末フォルダ/フォトライブラリから選択)からQRコードを読み取る
+  function decodeImageFile(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          URL.revokeObjectURL(url);
+          resolve(code ? code.data : null);
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          reject(e);
+        }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image-load-failed')); };
+      img.src = url;
+    });
+  }
+
+  return { isCameraSupported, start, stop, decodeImageFile };
 })();

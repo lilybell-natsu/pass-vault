@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="0.1.0">
+<meta name="app-version" content="0.1.1">
 <meta name="theme-color" content="#1B222C">
 <meta name="description" content="アカウントIDとパスワードを端末内で暗号化して保管するPWA">
 <title>Pass Vault</title>
@@ -72,7 +72,11 @@
       </div>
 
       <div id="lock-form-area">
-        <button id="btn-scan-start" class="btn btn-secondary btn-block">📷 QRコードをスキャン</button>
+        <button id="btn-scan-start" class="btn btn-secondary btn-block">📷 カメラでQRコードをスキャン</button>
+        <label class="btn btn-secondary btn-block file-btn">
+          🖼 画像からQRコードを読み込む
+          <input type="file" id="f-scan-image" accept="image/*" hidden>
+        </label>
         <div class="divider"><span>または貼り付け</span></div>
         <textarea id="lock-input" rows="2" placeholder="アクセスキーを貼り付け"></textarea>
         <button id="btn-unlock" class="btn btn-primary btn-block">解錠する</button>
@@ -248,6 +252,7 @@
   <div id="toast" class="toast hidden"></div>
 
   <script src="vendor/qrcode-gen.lib.js"></script>
+  <script src="vendor/jsqr.lib.js"></script>
   <script src="crypto.js"></script>
   <script src="accesskey.js"></script>
   <script src="storage.js"></script>

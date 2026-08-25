@@ -1,5 +1,5 @@
 // sw.js — network-first キャッシュ戦略（姉妹プロジェクトと同方針。stale cacheを避ける）
-const CACHE_NAME = 'pass-vault-v1';
+const CACHE_NAME = 'pass-vault-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ const CORE_ASSETS = [
   './qrscan.js',
   './generator.js',
   './vendor/qrcode-gen.lib.js',
+  './vendor/jsqr.lib.js',
   './manifest.json',
 ];
 
