@@ -618,6 +618,14 @@
       });
     });
 
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-copy');
+      if (!btn) return;
+      const targetId = btn.dataset.copyTarget;
+      const el = document.getElementById(targetId);
+      if (el) copyToClipboard(el.textContent, false);
+    });
+
     bindIdleResetEvents();
   }
 

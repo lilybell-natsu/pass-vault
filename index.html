@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="0.1.1">
+<meta name="app-version" content="0.1.2">
 <meta name="theme-color" content="#1B222C">
 <meta name="description" content="アカウントIDとパスワードを端末内で暗号化して保管するPWA">
 <title>Pass Vault</title>
@@ -28,7 +28,11 @@
       </header>
 
       <div id="setup-step-intro" class="setup-step">
-        <p>次の画面で、<strong>主アクセスキー</strong>と<strong>予備アクセスキー</strong>の2つが表示されます。どちらか一方があれば解錠できます。認証アプリのメモ機能・パスワードマネージャー・印刷など、<strong>別々の場所</strong>に保管してください。</p>
+        <ul class="intro-list">
+          <li><strong>主アクセスキー</strong>と<strong>予備アクセスキー</strong>の2つが発行されます</li>
+          <li>どちらか一方があれば解錠できます</li>
+          <li>認証アプリのメモ機能・パスワードマネージャー・印刷など、<strong>別々の場所</strong>に保管してください</li>
+        </ul>
         <p class="warn-text">⚠ 2つとも紛失すると、データを復元する手段はありません。</p>
         <button id="btn-setup-generate" class="btn btn-primary btn-block">アクセスキーを発行する</button>
       </div>
@@ -37,7 +41,10 @@
         <div class="key-card">
           <div class="key-card-label">主アクセスキー</div>
           <div id="qr-primary" class="qr-box"></div>
-          <div id="text-primary" class="key-text"></div>
+          <div class="key-text-row">
+            <div id="text-primary" class="key-text"></div>
+            <button type="button" class="btn btn-secondary btn-small btn-copy" data-copy-target="text-primary">コピー</button>
+          </div>
           <label class="check-row">
             <input type="checkbox" id="check-primary">
             <span>保存しました</span>
@@ -46,7 +53,10 @@
         <div class="key-card">
           <div class="key-card-label">予備アクセスキー</div>
           <div id="qr-backup" class="qr-box"></div>
-          <div id="text-backup" class="key-text"></div>
+          <div class="key-text-row">
+            <div id="text-backup" class="key-text"></div>
+            <button type="button" class="btn btn-secondary btn-small btn-copy" data-copy-target="text-backup">コピー</button>
+          </div>
           <label class="check-row">
             <input type="checkbox" id="check-backup">
             <span>保存しました（主アクセスキーとは別の場所に）</span>
@@ -236,12 +246,18 @@
         <div class="key-card">
           <div class="key-card-label">新しい主アクセスキー</div>
           <div id="qr-rotate-primary" class="qr-box"></div>
-          <div id="text-rotate-primary" class="key-text"></div>
+          <div class="key-text-row">
+            <div id="text-rotate-primary" class="key-text"></div>
+            <button type="button" class="btn btn-secondary btn-small btn-copy" data-copy-target="text-rotate-primary">コピー</button>
+          </div>
         </div>
         <div class="key-card">
           <div class="key-card-label">新しい予備アクセスキー</div>
           <div id="qr-rotate-backup" class="qr-box"></div>
-          <div id="text-rotate-backup" class="key-text"></div>
+          <div class="key-text-row">
+            <div id="text-rotate-backup" class="key-text"></div>
+            <button type="button" class="btn btn-secondary btn-small btn-copy" data-copy-target="text-rotate-backup">コピー</button>
+          </div>
         </div>
         <p class="warn-text">⚠ 古いアクセスキーはこの時点で無効になります。両方とも安全な場所に保管してから閉じてください。</p>
         <button id="btn-rotate-done" class="btn btn-primary btn-block">保管しました。閉じる</button>

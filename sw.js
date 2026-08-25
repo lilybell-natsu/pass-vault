@@ -1,5 +1,5 @@
 // sw.js — network-first キャッシュ戦略（姉妹プロジェクトと同方針。stale cacheを避ける）
-const CACHE_NAME = 'pass-vault-v2';
+const CACHE_NAME = 'pass-vault-v3';
 const CORE_ASSETS = [
   './',
   './index.html',

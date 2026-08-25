@@ -70,6 +70,10 @@ h1,h2,h3{ margin:0; }
 .soft{ color:var(--ink-soft); font-size:14px; }
 
 .setup-step + .setup-step{ margin-top:18px; }
+.intro-list{
+  margin:0 0 14px; padding-left:1.25em; display:flex; flex-direction:column; gap:8px;
+}
+.intro-list li{ font-size:14.5px; color:var(--ink); }
 .warn-text{
   font-size:13.5px; color:var(--bad); background:var(--bad-soft);
   border:1px solid var(--bad); border-radius:8px; padding:10px 12px; margin:14px 0;
@@ -84,12 +88,15 @@ h1,h2,h3{ margin:0; }
   text-transform:uppercase; margin-bottom:10px;
 }
 .qr-box{ display:flex; justify-content:center; background:#fff; border-radius:8px; padding:10px; margin-bottom:10px; }
+.key-text-row{ display:flex; align-items:stretch; gap:8px; margin-bottom:10px; }
 .key-text{
+  flex:1; min-width:0;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   font-size:13.5px; letter-spacing:.02em; word-break:break-all;
   background:var(--surface-2); border:1px solid var(--line); border-radius:8px;
-  padding:10px; margin-bottom:10px; user-select:all;
+  padding:10px; user-select:all;
 }
+.btn-copy{ flex-shrink:0; align-self:flex-start; }
 .check-row{ display:flex; align-items:center; gap:8px; font-size:14px; }
 .check-row input{ width:18px; height:18px; }
 
@@ -123,6 +130,7 @@ h1,h2,h3{ margin:0; }
 .divider::before, .divider::after{ content:""; flex:1; height:1px; background:var(--line); }
 
 /* ---------- lock scan ---------- */
+#lock-form-area .btn + .btn{ margin-top:10px; }
 #lock-video{ width:100%; border-radius:12px; background:#000; margin-bottom:12px; aspect-ratio:1/1; object-fit:cover; }
 #lock-input{
   width:100%; resize:vertical; border:1px solid var(--line); border-radius:10px;
